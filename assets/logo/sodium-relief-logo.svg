@@ -1,0 +1,28 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="180" y1="120" x2="844" y2="904" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#131A22"/>
+      <stop offset="1" stop-color="#06090E"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="294" y1="286" x2="724" y2="714" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7EFFF3"/>
+      <stop offset="0.52" stop-color="#2FB8FF"/>
+      <stop offset="1" stop-color="#74FF9E"/>
+    </linearGradient>
+    <filter id="glow" x="180" y="174" width="664" height="676" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+      <feGaussianBlur stdDeviation="20" result="effect1_foregroundBlur"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <rect x="92" y="92" width="840" height="840" rx="192" stroke="#1C2835" stroke-width="4"/>
+  <rect x="248" y="248" width="528" height="528" rx="132" fill="#0C121A" stroke="#223446" stroke-width="4"/>
+
+  <g filter="url(#glow)">
+    <path d="M664 336C627 297 573 274 499 274C402 274 330 329 330 407C330 476 381 516 472 538L559 559C629 575 660 603 660 647C660 704 604 750 514 750C438 750 379 721 340 671" stroke="url(#stroke)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <path d="M270 640C347 603 409 590 471 606C527 620 569 664 630 668C674 671 718 653 760 628" stroke="#6DEBFF" stroke-opacity="0.42" stroke-width="10" stroke-linecap="round"/>
+</svg>

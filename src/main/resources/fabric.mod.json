@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "sodiumrelief",
+  "version": "${version}",
+  "name": "Sodium Relief",
+  "description": "A lightweight GUI anti-stutter companion for Sodium focused on tooltip smoothness, hover stability, and smoother inventory-like UI interaction.",
+  "authors": [
+    "Erotoro"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/sodiumrelief/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.erodev.sodiumrelief.client.SodiumReliefClient"
+    ],
+    "sodium:config_api_user": [
+      "com.erodev.sodiumrelief.compat.sodium.SodiumConfigEntryPoint"
+    ],
+    "modmenu": [
+      "com.erodev.sodiumrelief.compat.modmenu.ModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    "sodiumrelief.mixins.tooltip.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*",
+    "sodium": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "update_checker": false
+    }
+  }
+}

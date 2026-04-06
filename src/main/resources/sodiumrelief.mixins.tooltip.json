@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.erodev.sodiumrelief.mixin.tooltip",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "HandledScreenTooltipMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
