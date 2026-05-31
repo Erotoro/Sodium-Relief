@@ -1,0 +1,20 @@
+plugins {
+    id "java-library"
+}
+
+base {
+    archivesName = "${mod_id}-core"
+}
+
+dependencies {
+    api "com.google.code.gson:gson:${gson_version}"
+
+    // Fabric Loader provides FabricLoader.getInstance() used by ReliefConfigManager,
+    // ReflectiveIrisShaderBackend, etc. It's a regular Maven artifact — no Loom
+    // needed since core never touches the remapped Minecraft jar.
+    compileOnly "net.fabricmc:fabric-loader:${fabric_loader_12111}"
+
+    // SLF4J is part of the Minecraft runtime; for core to compile its ReliefLogger
+    // we add the API as a compile-only dependency.
+    compileOnly "org.slf4j:slf4j-api:2.0.16"
+}

@@ -1,0 +1,69 @@
+plugins {
+    id "net.fabricmc.fabric-loom" version "${loom_version}"
+}
+
+base {
+    archivesName = "${mod_id}-mc261x"
+}
+
+// MC 26.x ships on Java 25.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+}
+
+loom {
+    mods {
+        sodiumrelief {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_261x}"
+    // MC 26.1+ ships fully unobfuscated with official names and parameter names,
+    // so no mapping layer is used. The `net.fabricmc.fabric-loom` plugin (not the
+    // `-remap` variant) skips all remapping; declaring any `mappings` here fails with
+    // "Cannot use Mojang mappings in a non-obfuscated environment". Source therefore
+    // references Minecraft by its official names directly.
+    // The non-remap Loom plugin does not provide the mod* configurations (they exist
+    // only to remap mod dependencies between intermediary and dev mappings). With no
+    // remapping, mod dependencies are consumed as-is via the standard Gradle configs.
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_261x}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_261x}"
+
+    // Shared, pure-Java logic packaged into the final jar.
+    implementation project(":sodium-relief-core")
+
+    compileOnly "com.terraformersmc:modmenu:${modmenu_261x}"
+    runtimeOnly "com.terraformersmc:modmenu:${modmenu_261x}"
+
+    // No Sodium publication confirmed for 26.1.x. Add once available:
+    // compileOnly "maven.modrinth:sodium:${sodium_261x}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+jar {
+    from(project(":sodium-relief-core").sourceSets.main.output)
+
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+sourcesJar {
+    from(project(":sodium-relief-core").sourceSets.main.allSource)
+}

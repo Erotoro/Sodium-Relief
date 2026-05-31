@@ -1,6 +1,14 @@
-/.gradle/
-/build/
-/out/
-/.idea/
-/*.iml
-/.vscode/
+.gradle/
+build/
+out/
+run/
+**/.gradle/
+**/build/
+**/out/
+**/run/
+.idea/
+*.iml
+.vscode/
+
+# local tool state (machine-local; do not commit)
+.claude/

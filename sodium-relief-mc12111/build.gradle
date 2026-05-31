@@ -1,0 +1,50 @@
+plugins {
+    id "net.fabricmc.fabric-loom-remap" version "${loom_remap_version}"
+}
+
+base {
+    archivesName = "${mod_id}-mc12111"
+}
+
+loom {
+    mods {
+        sodiumrelief {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_12111}"
+    mappings "net.fabricmc:yarn:${yarn_mappings_12111}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_12111}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_12111}"
+
+    // Shared, pure-Java logic packaged into the final jar.
+    implementation project(":sodium-relief-core")
+
+    modCompileOnly "com.terraformersmc:modmenu:${modmenu_12111}"
+    modLocalRuntime "com.terraformersmc:modmenu:${modmenu_12111}"
+
+    modCompileOnly "maven.modrinth:sodium:${sodium_12111}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+jar {
+    from(project(":sodium-relief-core").sourceSets.main.output)
+
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+sourcesJar {
+    from(project(":sodium-relief-core").sourceSets.main.allSource)
+}

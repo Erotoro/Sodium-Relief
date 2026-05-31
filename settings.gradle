@@ -10,3 +10,14 @@ pluginManagement {
 }
 
 rootProject.name = "sodium-relief"
+
+include "sodium-relief-core"
+include "sodium-relief-mc12111"
+
+// The 26.1.x module builds against minecraft:26.1.2 (now published in the launcher
+// manifest) using the non-remap Loom plugin, and requires a Java 25 toolchain. It is
+// kept behind a flag (default on) so contributors without a JDK 25 installed can opt
+// out with `-Pinclude_mc261x=false` instead of failing configuration.
+if (settings.providers.gradleProperty("include_mc261x").map { Boolean.parseBoolean(it) }.getOrElse(true)) {
+    include "sodium-relief-mc261x"
+}
