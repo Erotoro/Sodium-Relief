@@ -1,6 +1,7 @@
 {
   "sodiumrelief.mod_name": "Sodium Relief",
   "sodiumrelief.screen.initializing": "Sodium Relief еще инициализируется. Попробуйте снова.",
+  "sodiumrelief.button.export_benchmark": "Экспорт бенчмарка",
   "sodiumrelief.button.reset_caches": "Сбросить состояние подсказок",
   "sodiumrelief.button.done": "Готово",
   "sodiumrelief.category.general": "Общее",

@@ -3,6 +3,8 @@ package com.erodev.sodiumrelief.client;
 import com.erodev.sodiumrelief.cache.CacheInvalidationManager;
 import com.erodev.sodiumrelief.cache.TextWidthCache;
 import com.erodev.sodiumrelief.cache.TooltipLayoutCache;
+import com.erodev.sodiumrelief.debug.BenchmarkSnapshot;
+import com.erodev.sodiumrelief.debug.BenchmarkSnapshotWriter;
 import com.erodev.sodiumrelief.compat.sodium.SodiumCompat;
 import com.erodev.sodiumrelief.config.ReliefConfigManager;
 import com.erodev.sodiumrelief.debug.ReliefLogger;
@@ -12,6 +14,8 @@ import com.erodev.sodiumrelief.hover.HoverTracker;
 import com.erodev.sodiumrelief.tooltip.TooltipPresentationService;
 import com.erodev.sodiumrelief.ui.ScreenStateTracker;
 import com.erodev.sodiumrelief.ui.UiOptimizationService;
+import java.io.IOException;
+import java.time.Instant;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -87,6 +91,23 @@ public final class SodiumReliefRuntime {
     public CacheInvalidationManager cacheInvalidationManager() { return cacheInvalidationManager; }
     public UiOptimizationService uiOptimizationService() { return uiOptimizationService; }
     public SodiumCompat sodiumCompat() { return sodiumCompat; }
+
+    public void exportBenchmarkSnapshot(String label) {
+        Minecraft client = Minecraft.getInstance();
+        String screenId = client.screen == null ? "none" : client.screen.getClass().getName();
+        BenchmarkSnapshot snapshot = BenchmarkSnapshot.capture(
+            label,
+            screenId,
+            metrics,
+            tooltipLayoutCache.size(),
+            Instant.now()
+        );
+        try {
+            ReliefLogger.info("Exporting benchmark snapshot: " + BenchmarkSnapshotWriter.write(configManager.benchmarkDirectory(), snapshot));
+        } catch (IOException exception) {
+            ReliefLogger.warn("Failed to export benchmark snapshot", exception);
+        }
+    }
 
     private final class CacheResetReloader implements SimpleSynchronousResourceReloadListener {
         @Override

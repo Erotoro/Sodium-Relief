@@ -37,6 +37,7 @@ public final class SodiumReliefConfigScreen extends Screen {
         clearWidgets();
         buildCategories();
         buildOptions(runtime.configManager().config());
+        addRenderableWidget(Button.builder(ReliefTexts.button("export_benchmark"), button -> runtime.exportBenchmarkSnapshot("manual-export")).bounds(width - 314, height - 28, 100, 20).build());
         addRenderableWidget(Button.builder(ReliefTexts.button("reset_caches"), button -> runtime.cacheInvalidationManager().invalidateAll()).bounds(width - 210, height - 28, 100, 20).build());
         addRenderableWidget(Button.builder(ReliefTexts.button("done"), button -> onClose()).bounds(width - 106, height - 28, 100, 20).build());
     }

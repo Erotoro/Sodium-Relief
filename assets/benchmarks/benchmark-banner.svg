@@ -1,0 +1,36 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <rect width="1280" height="720" fill="#13161E"/>
+  <rect x="0" y="0" width="1280" height="6" fill="#5BE3A7"/>
+
+  <text x="80" y="92" fill="#5BE3A7" font-size="20" font-weight="bold" letter-spacing="2">AUTOMATED IN-GAME BENCHMARK · MINECRAFT 1.21.11 &amp; 26.1.X</text>
+  <text x="80" y="150" fill="#FFFFFF" font-size="48" font-weight="bold">How much tooltip work Sodium Relief skips</text>
+  <text x="80" y="188" fill="#9BA3B4" font-size="22">Tooltip-rebuild calls avoided by layout reuse, on a real inventory screen.</text>
+
+  <!-- Panel 1: static hover -->
+  <text x="80" y="268" fill="#FFFFFF" font-size="26" font-weight="bold">Resting on an item</text>
+  <text x="80" y="298" fill="#9BA3B4" font-size="19">Cursor held on one item</text>
+
+  <rect x="80" y="320" width="820" height="30" rx="4" fill="#3A3F4B"/>
+  <text x="90" y="341" fill="#C7CCD6" font-size="17">Without reuse · 2,418 rebuilds</text>
+  <rect x="80" y="360" width="6" height="30" rx="3" fill="#5BE3A7"/>
+  <text x="98" y="381" fill="#5BE3A7" font-size="17" font-weight="bold">With Sodium Relief · 1 rebuild</text>
+
+  <text x="1200" y="352" fill="#5BE3A7" font-size="58" font-weight="bold" text-anchor="end">99.96%</text>
+  <text x="1200" y="384" fill="#9BA3B4" font-size="19" text-anchor="end">avoided</text>
+
+  <line x1="80" y1="430" x2="1200" y2="430" stroke="#262B36" stroke-width="2"/>
+
+  <!-- Panel 2: inventory scan -->
+  <text x="80" y="486" fill="#FFFFFF" font-size="26" font-weight="bold">Scanning the inventory</text>
+  <text x="80" y="516" fill="#9BA3B4" font-size="19">Cursor sweeping 36 different items</text>
+
+  <rect x="80" y="538" width="820" height="30" rx="4" fill="#3A3F4B"/>
+  <text x="90" y="559" fill="#C7CCD6" font-size="17">Without reuse · 1,278 rebuilds</text>
+  <rect x="80" y="578" width="69" height="30" rx="4" fill="#5BE3A7"/>
+  <text x="159" y="599" fill="#5BE3A7" font-size="17" font-weight="bold">With Sodium Relief · 107 rebuilds</text>
+
+  <text x="1200" y="570" fill="#5BE3A7" font-size="58" font-weight="bold" text-anchor="end">91.6%</text>
+  <text x="1200" y="602" fill="#9BA3B4" font-size="19" text-anchor="end">avoided</text>
+
+  <text x="80" y="678" fill="#6B7280" font-size="17">Reproducible via gradlew runClientGameTest · near-identical on 1.21.11 and 26.1.x · counts rebuild calls, not FPS</text>
+</svg>

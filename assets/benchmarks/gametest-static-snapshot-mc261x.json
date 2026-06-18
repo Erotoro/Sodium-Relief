@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-06-17T22:51:45.738796800Z",
+  "label": "gametest-inventory-static",
+  "screenId": "net.minecraft.client.gui.screens.inventory.InventoryScreen",
+  "tooltipHits": 2421,
+  "tooltipMisses": 15,
+  "tooltipPathInvocations": 2436,
+  "tooltipFastPathChecksPerformed": 2436,
+  "tooltipFastPathHits": 2434,
+  "tooltipExpensivePathInvocations": 2,
+  "tooltipCacheLookupsPerformed": 2436,
+  "tooltipFallbackEvaluations": 13,
+  "tooltipReusedCount": 0,
+  "tooltipFallbackMisses": 13,
+  "tooltipForcedCount": 13,
+  "invalidations": 7,
+  "fullInvalidations": 1,
+  "tooltipCacheInvalidations": 1,
+  "tooltipContextResets": 5,
+  "hoverState": "STABLE",
+  "tooltipCacheEntries": 2
+}

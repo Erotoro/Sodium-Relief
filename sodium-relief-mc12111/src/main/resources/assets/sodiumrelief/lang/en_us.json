@@ -1,6 +1,7 @@
 {
   "sodiumrelief.mod_name": "Sodium Relief",
   "sodiumrelief.screen.initializing": "Sodium Relief is still initializing. Please try again.",
+  "sodiumrelief.button.export_benchmark": "Export Benchmark",
   "sodiumrelief.button.reset_caches": "Reset Tooltip State",
   "sodiumrelief.button.done": "Done",
   "sodiumrelief.category.general": "General",

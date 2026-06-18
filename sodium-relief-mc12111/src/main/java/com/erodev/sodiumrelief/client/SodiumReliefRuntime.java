@@ -3,11 +3,15 @@ package com.erodev.sodiumrelief.client;
 import com.erodev.sodiumrelief.cache.CacheInvalidationManager;
 import com.erodev.sodiumrelief.cache.TextWidthCache;
 import com.erodev.sodiumrelief.cache.TooltipLayoutCache;
+import com.erodev.sodiumrelief.debug.BenchmarkSnapshot;
+import com.erodev.sodiumrelief.debug.BenchmarkSnapshotWriter;
 import com.erodev.sodiumrelief.compat.sodium.SodiumCompat;
 import com.erodev.sodiumrelief.config.ReliefConfigManager;
 import com.erodev.sodiumrelief.debug.ReliefDebugOverlay;
 import com.erodev.sodiumrelief.debug.ReliefLogger;
 import com.erodev.sodiumrelief.debug.ReliefMetrics;
+import java.io.IOException;
+import java.time.Instant;
 import com.erodev.sodiumrelief.hover.HoverSmoothingService;
 import com.erodev.sodiumrelief.hover.HoverTracker;
 import com.erodev.sodiumrelief.tooltip.TooltipPresentationService;
@@ -94,6 +98,23 @@ public final class SodiumReliefRuntime {
     public CacheInvalidationManager cacheInvalidationManager() { return cacheInvalidationManager; }
     public UiOptimizationService uiOptimizationService() { return uiOptimizationService; }
     public SodiumCompat sodiumCompat() { return sodiumCompat; }
+
+    public void exportBenchmarkSnapshot(String label) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        String screenId = client.currentScreen == null ? "none" : client.currentScreen.getClass().getName();
+        BenchmarkSnapshot snapshot = BenchmarkSnapshot.capture(
+            label,
+            screenId,
+            metrics,
+            tooltipLayoutCache.size(),
+            Instant.now()
+        );
+        try {
+            ReliefLogger.info("Exporting benchmark snapshot: " + BenchmarkSnapshotWriter.write(configManager.benchmarkDirectory(), snapshot));
+        } catch (IOException exception) {
+            ReliefLogger.warn("Failed to export benchmark snapshot", exception);
+        }
+    }
 
     private final class CacheResetReloader implements SynchronousResourceReloader {
         @Override

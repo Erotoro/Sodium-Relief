@@ -63,6 +63,10 @@ public final class ReliefConfigManager {
         return config;
     }
 
+    public Path benchmarkDirectory() {
+        return path.getParent().resolve("benchmarks").resolve(SodiumReliefConstants.MOD_ID);
+    }
+
     public void normalizeInMemory() {
         config.normalize();
     }

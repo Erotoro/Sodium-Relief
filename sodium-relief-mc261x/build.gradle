@@ -25,6 +25,18 @@ loom {
     }
 }
 
+// Client gametest: drives a real 26.1.x client into an inventory screen and exports
+// a benchmark snapshot, mirroring the 1.21.11 module. Runs via
+// `gradlew :sodium-relief-mc261x:runClientGameTest` (needs JDK 25).
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "sodiumrelief-gametest"
+        enableClientGameTests = true
+        eula = true
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_261x}"
     // MC 26.1+ ships fully unobfuscated with official names and parameter names,
