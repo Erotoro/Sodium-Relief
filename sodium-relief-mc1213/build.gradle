@@ -1,0 +1,76 @@
+plugins {
+    id "com.modrinth.minotaur" version "2.+"
+    id "net.fabricmc.fabric-loom-remap" version "${loom_remap_version}"
+}
+
+base {
+    archivesName = "${mod_id}-mc1213"
+}
+
+loom {
+    mods {
+        sodiumrelief {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// No gametest sourceset here: the client gametest harness (fabric-client-gametest-api-v1)
+// only exists from MC 1.21.4's Fabric API onward, so this 1.21.2–1.21.3 module can't compile
+// it. The tooltip/text mixin targets are identical across the whole 1.21 line (javap-verified)
+// and runtime-confirmed via the 1.21.4+ gametests.
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_1213}"
+    mappings "net.fabricmc:yarn:${yarn_mappings_1213}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_12111}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_1213}"
+
+    // Shared, pure-Java logic packaged into the final jar.
+    implementation project(":sodium-relief-core")
+
+    modCompileOnly "com.terraformersmc:modmenu:${modmenu_1213}"
+    modLocalRuntime "com.terraformersmc:modmenu:${modmenu_1213}"
+
+    // No native Sodium options-page integration on this range (older Sodium config API);
+    // config is exposed via Mod Menu + the vanilla options button. So no Sodium dependency.
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+jar {
+    from(project(":sodium-relief-core").sourceSets.main.output)
+
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+sourcesJar {
+    from(project(":sodium-relief-core").sourceSets.main.allSource)
+}
+
+// Publish to Modrinth via Minotaur. Dry run by default (debugMode); pass -PmodrinthRelease
+// to actually upload. Token comes from the MODRINTH_TOKEN env var; project id is fixed below.
+modrinth {
+    debugMode = !project.hasProperty("modrinthRelease")
+    projectId = "sodium-relief"
+    versionNumber = "${project.version}+1.21.3"
+    versionName = "Sodium Relief ${project.version} for MC 1.21.2-1.21.3"
+    versionType = project.findProperty("modrinthVersionType") ?: "release"
+    uploadFile = tasks.remapJar
+    gameVersions = ["1.21.2", "1.21.3"]
+    loaders = ["fabric"]
+    changelog = providers.environmentVariable("CHANGELOG").getOrElse("")
+    dependencies {
+        required.project "fabric-api"
+        optional.project "modmenu"
+        optional.project "sodium"
+    }
+}

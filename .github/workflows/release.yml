@@ -1,0 +1,54 @@
+# Builds every module and publishes each jar to Modrinth via the Minotaur Gradle plugin
+# (one Modrinth version per Minecraft range — the per-module config lives in each
+# sodium-relief-mc*/build.gradle's `modrinth { }` block).
+#
+# One-time setup required in the GitHub repo (Settings → Secrets and variables → Actions):
+#   • Secret  MODRINTH_TOKEN  — a Modrinth API token with the "Create version" scope
+#                               (modrinth.com/settings/pats). That is the only secret needed;
+#                               the Modrinth project id is hard-coded in the build scripts.
+#
+# Trigger: publishing a GitHub Release (a pre-release publishes as a Modrinth "beta").
+# You can also run it manually from the Actions tab (workflow_dispatch).
+name: Publish release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish-modrinth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 and 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: |
+            21
+            25
+
+      # 1.21.x modules need a Java 21 toolchain, 26.x modules need Java 25. gradle.properties
+      # pins local Windows JDK paths; point it at the CI JDKs instead.
+      - name: Point Gradle toolchains at the CI JDKs
+        run: |
+          sed -i "s|^org.gradle.java.installations.paths=.*|org.gradle.java.installations.paths=${JAVA_HOME_21_X64},${JAVA_HOME_25_X64}|" gradle.properties
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # `-PmodrinthRelease` flips Minotaur out of its default dry-run (debugMode) and actually
+      # uploads. Runs core unit tests first; the in-game gametests are validated separately.
+      - name: Publish all modules to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CHANGELOG: ${{ github.event.release.body }}
+        run: >
+          ./gradlew test modrinth
+          -PmodrinthRelease
+          -PmodrinthVersionType=${{ github.event.release.prerelease && 'beta' || 'release' }}
+          --no-daemon

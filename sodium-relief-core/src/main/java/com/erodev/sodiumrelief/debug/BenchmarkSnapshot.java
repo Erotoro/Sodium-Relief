@@ -28,9 +28,19 @@ public record BenchmarkSnapshot(
     long tooltipCacheInvalidations,
     long tooltipContextResets,
     String hoverState,
-    int tooltipCacheEntries
+    int tooltipCacheEntries,
+    long tooltipBuildSamples,
+    long tooltipBuildAverageNanos,
+    long estimatedTooltipNanosSaved,
+    long textWidthCacheHits,
+    long textWidthCacheMisses,
+    long textWidthLen1,
+    long textWidthLen2,
+    long textWidthLen3,
+    long textWidthLen4to8,
+    long textWidthLen9plus
 ) {
-    private static final int SCHEMA_VERSION = 1;
+    private static final int SCHEMA_VERSION = 2;
 
     public static BenchmarkSnapshot capture(
         String label,
@@ -60,7 +70,17 @@ public record BenchmarkSnapshot(
             metrics.tooltipCacheInvalidations(),
             metrics.tooltipContextResets(),
             metrics.hoverState(),
-            tooltipCacheEntries
+            tooltipCacheEntries,
+            metrics.tooltipBuildSamples(),
+            metrics.tooltipBuildAverageNanos(),
+            metrics.estimatedTooltipNanosSaved(),
+            metrics.textWidthCacheHits(),
+            metrics.textWidthCacheMisses(),
+            metrics.textWidthLengthBucket(0),
+            metrics.textWidthLengthBucket(1),
+            metrics.textWidthLengthBucket(2),
+            metrics.textWidthLengthBucket(3),
+            metrics.textWidthLengthBucket(4)
         );
     }
 }

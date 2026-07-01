@@ -19,16 +19,18 @@ It is not a replacement for Sodium and not a general FPS mod. It will not raise 
 
 ## Measured impact
 
-The effect is reduced redundant work, not extra frames — so it is measured as tooltip rebuilds avoided rather than FPS. The numbers below come from an automated in-game test that opens a real inventory screen, hovers items, and reports how often a tooltip layout was reused instead of rebuilt:
+The effect is reduced redundant work, not extra frames — so it is measured as tooltip builds avoided rather than FPS. An automated in-game test opens a real inventory screen, hovers items, and counts the **actual `getTooltipFromItem` builds** (the expensive part) instead of rebuilding the tooltip every frame:
 
-![Tooltip rebuilds avoided: ~99.96% while resting on an item, ~91.6% while scanning the inventory, on 1.21.11 and 26.1.x](assets/benchmarks/benchmark-banner.png)
+![Sodium Relief builds each tooltip once and reuses it: resting on an item 2,429 frames to 2 builds (99.9%), scanning the inventory 3,714 frames to 38 builds (~99%); each build ~0.1-0.3 ms, ~0.5 s of CPU saved, across Minecraft 1.21 - 26.2](assets/benchmarks/benchmark-banner.png)
 
-| Scenario                         | Tooltip-path calls | Rebuilds with Sodium Relief | Avoided  |
-| -------------------------------- | ------------------ | --------------------------- | -------- |
-| Resting on a single item         | ~2,400             | 1                           | ~99.96%  |
-| Scanning across 36 distinct items | ~1,280            | ~107                        | ~91.6%   |
+| Scenario                          | Tooltip draws | Real builds with Sodium Relief | Avoided |
+| --------------------------------- | ------------- | ------------------------------ | ------- |
+| Resting on one item               | 2,429         | 2                              | 99.9%   |
+| Scanning 36 items (3 passes)      | 3,714         | 38                             | ~99%    |
 
-Numbers are near-identical on 1.21.11 and 26.1.2. Reproduce them yourself with `gradlew :sodium-relief-mc12111:runClientGameTest` (or `:sodium-relief-mc261x:runClientGameTest`); each run also writes a raw counter snapshot you can inspect. A snapshot can be exported in-game at any time from the config screen's *Export Benchmark* button.
+Each tooltip build was measured in-game at **~0.13 ms** for common items (more for complex ones, ~0.26 ms), so the reuse above avoided roughly **half a second of CPU work** over the ~20-second test — work that would otherwise land as small per-frame hitches while you hover. (These counts are the real `getTooltipFromItem` builds; an earlier version of this table reported a higher number that was actually an internal fingerprint-rebuild counter, not the expensive build itself.)
+
+Numbers are near-identical across Minecraft versions — verified in-game on 1.21.4, 1.21.10, 1.21.11 and 26.1.2. Reproduce them yourself with `gradlew :sodium-relief-mc12110:runClientGameTest` (the client gametest ships in every 1.21.4-and-newer module and the 26.x modules); each run writes a raw counter snapshot — including the measured build time — that you can inspect. A snapshot can be exported in-game at any time from the config screen's *Export Benchmark* button.
 
 <img src="assets/benchmarks/inventory-tooltip-gametest.png" width="480" alt="The inventory screen the automated test hovers, captured in-game" />
 
@@ -36,12 +38,19 @@ Numbers are near-identical on 1.21.11 and 26.1.2. Reproduce them yourself with `
 
 ## Compatibility
 
-Two jars are built from the same shared core:
+Several jars are built from the same shared core, each covering a Minecraft version range:
 
-| Jar                              | Minecraft | Loader | Java |
-| -------------------------------- | --------- | ------ | ---- |
-| `sodiumrelief-mc12111-<ver>.jar` | 1.21.11   | Fabric | 21   |
-| `sodiumrelief-mc261x-<ver>.jar`  | 26.1.x    | Fabric | 25   |
+| Jar                              | Minecraft       | Loader | Java |
+| -------------------------------- | --------------- | ------ | ---- |
+| `sodiumrelief-mc1211-<ver>.jar`  | 1.21 – 1.21.1   | Fabric | 21   |
+| `sodiumrelief-mc1213-<ver>.jar`  | 1.21.2 – 1.21.3 | Fabric | 21   |
+| `sodiumrelief-mc1214-<ver>.jar`  | 1.21.4          | Fabric | 21   |
+| `sodiumrelief-mc1215-<ver>.jar`  | 1.21.5          | Fabric | 21   |
+| `sodiumrelief-mc1218-<ver>.jar`  | 1.21.6 – 1.21.8 | Fabric | 21   |
+| `sodiumrelief-mc12110-<ver>.jar` | 1.21.9 – 1.21.10 | Fabric | 21   |
+| `sodiumrelief-mc12111-<ver>.jar` | 1.21.11         | Fabric | 21   |
+| `sodiumrelief-mc261x-<ver>.jar`  | 26.1.x          | Fabric | 25   |
+| `sodiumrelief-mc262x-<ver>.jar`  | 26.2            | Fabric | 25   |
 
 Client-side only. Requires Fabric API. Sodium is recommended but not required. Mod Menu is optional.
 

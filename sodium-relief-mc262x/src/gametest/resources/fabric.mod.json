@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "sodiumrelief-gametest",
+  "version": "1.0.0",
+  "name": "Sodium Relief Gametest",
+  "description": "Client gametest that measures tooltip-layout reuse on a real inventory screen.",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "com.erodev.sodiumrelief.gametest.TooltipBenchmarkClientGameTest"
+    ]
+  },
+  "depends": {
+    "sodiumrelief": "*",
+    "fabricloader": ">=0.19",
+    "minecraft": "~26.2"
+  }
+}

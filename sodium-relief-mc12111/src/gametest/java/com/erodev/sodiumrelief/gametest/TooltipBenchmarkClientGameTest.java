@@ -48,6 +48,8 @@ public class TooltipBenchmarkClientGameTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
         try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
+            // Benchmark with detailed metrics on so build-cost and text-width timings are captured.
+            context.runOnClient(client -> SodiumReliefClient.runtime().metrics().applyDebugMode(true));
             singleplayer.getClientWorld().waitForChunksRender();
 
             openInventoryWith(context, slot -> new ItemStack(Items.NETHERITE_PICKAXE));
@@ -123,7 +125,11 @@ public class TooltipBenchmarkClientGameTest implements FabricClientGameTest {
                 break;
             }
         }
-        return slot -> new ItemStack(items.get(slot % items.size()));
+        // Stacked counts so the slot stack-count strings ("7", "64", "100") render every frame,
+        // which is the only thing that exercises font.width(String) / the text-width cache. Lets
+        // the snapshot capture that cache's hit-rate and string-length profile.
+        int[] counts = {7, 64, 100};
+        return slot -> new ItemStack(items.get(slot % items.size()), counts[slot % counts.length]);
     }
 
     private static long[] readCounters(MinecraftClient client) {

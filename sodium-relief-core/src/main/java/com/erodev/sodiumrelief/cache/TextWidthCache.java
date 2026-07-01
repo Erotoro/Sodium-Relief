@@ -10,7 +10,13 @@ import java.util.Map;
  * this is a correctness-safe cache as long as it is cleared whenever font metrics can
  * change. That happens on a client resource reload (which also covers language changes
  * and toggling forced-unicode), and the runtime wires {@link #clear()} into exactly
- * that path. Bounded by an LRU so memory stays flat.
+ * that path. Bounded so memory stays flat.
+ *
+ * <p>Uses <b>insertion order</b>, not access order: in-game measurement showed this cache's
+ * real traffic is exclusively 1-3 character stack-count strings with a tiny distinct working
+ * set far below the size cap, so eviction effectively never fires. Access-order would then pay
+ * a structural relink on every read (a write-on-read) for an eviction policy that never
+ * matters — pure overhead. Insertion order keeps reads to a plain lookup.
  */
 public final class TextWidthCache {
     private final LinkedHashMap<String, Integer> entries;
@@ -19,7 +25,7 @@ public final class TextWidthCache {
 
     public TextWidthCache(int maxSize) {
         this.maxSize = Math.max(1, maxSize);
-        this.entries = new LinkedHashMap<>(256, 0.75F, true) {
+        this.entries = new LinkedHashMap<>(256, 0.75F, false) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, Integer> eldest) {
                 return size() > TextWidthCache.this.maxSize;

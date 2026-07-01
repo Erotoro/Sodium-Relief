@@ -2,7 +2,6 @@ package com.erodev.sodiumrelief.cache;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public final class BoundedLruCache<K, V> {
     private final LinkedHashMap<K, Entry<V>> entries;
@@ -20,16 +19,21 @@ public final class BoundedLruCache<K, V> {
         };
     }
 
-    public synchronized Optional<V> get(K key, long now) {
+    /**
+     * Returns the cached value for {@code key}, or {@code null} if it is absent or has
+     * expired. Returning {@code null} rather than an {@code Optional} keeps the per-frame
+     * tooltip lookup allocation-free on the hit path.
+     */
+    public synchronized V get(K key, long now) {
         Entry<V> entry = entries.get(key);
         if (entry == null) {
-            return Optional.empty();
+            return null;
         }
         if (now - entry.createdAtMs() > ttlMs) {
             entries.remove(key);
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(entry.value());
+        return entry.value();
     }
 
     public synchronized void put(K key, V value, long now) {

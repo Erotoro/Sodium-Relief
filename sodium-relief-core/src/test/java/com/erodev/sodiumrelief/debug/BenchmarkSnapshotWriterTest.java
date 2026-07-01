@@ -89,4 +89,44 @@ class BenchmarkSnapshotWriterTest {
         assertEquals(snapshot.exportedAt(), restored.exportedAt());
         assertEquals(snapshot.screenId(), restored.screenId());
     }
+
+    @Test
+    void snapshotCapturesMeasurementMetrics() {
+        ReliefMetrics metrics = new ReliefMetrics();
+        metrics.applyDebugMode(true);
+        // 8 tooltip-path invocations, 2 of which actually rebuilt (expensive path).
+        for (int i = 0; i < 8; i++) {
+            metrics.tooltipPathInvocation();
+        }
+        metrics.tooltipExpensivePathInvocation();
+        metrics.tooltipExpensivePathInvocation();
+        // Two builds measured at 100 ns and 200 ns -> average 150 ns.
+        metrics.tooltipBuild(100L);
+        metrics.tooltipBuild(200L);
+        // Text-width cache traffic across lengths 1, 2 and 12.
+        metrics.textWidthCacheHit(2);
+        metrics.textWidthCacheHit(1);
+        metrics.textWidthCacheMiss(12);
+
+        assertEquals(2L, metrics.tooltipBuildSamples());
+        assertEquals(150L, metrics.tooltipBuildAverageNanos());
+        // avoided = 8 - 2 = 6 builds; estimated saved = 150 ns * 6 = 900 ns.
+        assertEquals(900L, metrics.estimatedTooltipNanosSaved());
+        assertEquals(2L, metrics.textWidthCacheHits());
+        assertEquals(1L, metrics.textWidthCacheMisses());
+        assertEquals(1L, metrics.textWidthLengthBucket(0)); // length 1
+        assertEquals(1L, metrics.textWidthLengthBucket(1)); // length 2
+        assertEquals(1L, metrics.textWidthLengthBucket(4)); // length 12 -> bucket "9+"
+
+        BenchmarkSnapshot snapshot = BenchmarkSnapshot.capture(
+            "Measurement", "minecraft:generic_9x6", metrics, 0, Instant.parse("2026-06-16T22:00:00Z"));
+        assertEquals(2L, snapshot.tooltipBuildSamples());
+        assertEquals(150L, snapshot.tooltipBuildAverageNanos());
+        assertEquals(900L, snapshot.estimatedTooltipNanosSaved());
+        assertEquals(2L, snapshot.textWidthCacheHits());
+        assertEquals(1L, snapshot.textWidthCacheMisses());
+        assertEquals(1L, snapshot.textWidthLen1());
+        assertEquals(1L, snapshot.textWidthLen2());
+        assertEquals(1L, snapshot.textWidthLen9plus());
+    }
 }

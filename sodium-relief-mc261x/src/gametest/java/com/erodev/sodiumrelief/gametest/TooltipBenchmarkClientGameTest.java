@@ -39,6 +39,8 @@ public class TooltipBenchmarkClientGameTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
         try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
+            // Benchmark with detailed metrics on so build-cost and text-width timings are captured.
+            context.runOnClient(client -> SodiumReliefClient.runtime().metrics().applyDebugMode(true));
             singleplayer.getClientLevel().waitForChunksRender();
 
             openInventoryWith(context, slot -> new ItemStack(Items.NETHERITE_PICKAXE));

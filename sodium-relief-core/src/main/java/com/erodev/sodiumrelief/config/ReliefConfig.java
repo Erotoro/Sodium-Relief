@@ -9,7 +9,13 @@ public final class ReliefConfig {
 
     public boolean enableTooltipLayoutCache = true;
     public int tooltipCacheSize = 256;
-    public long tooltipCacheTtlMs = 1_500L;
+    // The fingerprint (item + components patch + count + advanced + language) is exhaustive for
+    // a vanilla tooltip, so a cached layout can only be stale for tooltips that vary on state the
+    // fingerprint cannot see (e.g. a mod drawing a live timer). The TTL is the safety valve for
+    // exactly that rare case. In-game measurement showed a short TTL forced a real ~260 us rebuild
+    // every 1.5 s on a sustained hover (a periodic micro-stutter) and broke reuse when comparing
+    // items back and forth, so the default is generous; lower it if you rely on animated tooltips.
+    public long tooltipCacheTtlMs = 30_000L;
     public boolean strictTooltipInvalidation = true;
 
     public boolean enableHoverSmoothing = true;

@@ -21,3 +21,20 @@ include "sodium-relief-mc12111"
 if (settings.providers.gradleProperty("include_mc261x").map { Boolean.parseBoolean(it) }.getOrElse(true)) {
     include "sodium-relief-mc261x"
 }
+
+// The 26.2 module shares the same non-remap Loom toolchain and Java 25 requirement as
+// the 26.1.x module (26.2 is likewise fully unobfuscated). Kept behind the same kind of
+// opt-out flag (default on) so contributors without a JDK 25 can build with
+// `-Pinclude_mc262x=false`.
+if (settings.providers.gradleProperty("include_mc262x").map { Boolean.parseBoolean(it) }.getOrElse(true)) {
+    include "sodium-relief-mc262x"
+}
+
+// Legacy 1.21–1.21.10 range-jars. Same obfuscated/Yarn/Java-21 platform as the 1.21.11
+// module; each covers a Minecraft compatibility group and is gated behind its own flag
+// (default on) so any group can be skipped with e.g. `-Pinclude_mc1211=false`.
+["mc1211", "mc1213", "mc1214", "mc1215", "mc1218", "mc12110"].each { id ->
+    if (settings.providers.gradleProperty("include_${id}").map { Boolean.parseBoolean(it) }.getOrElse(true)) {
+        include "sodium-relief-${id}"
+    }
+}

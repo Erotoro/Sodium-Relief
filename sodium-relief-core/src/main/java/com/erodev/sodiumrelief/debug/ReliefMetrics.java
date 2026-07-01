@@ -36,6 +36,15 @@ public final class ReliefMetrics {
     private long tooltipFallbackMissNanos;
     private long tooltipForcedRenderNanos;
 
+    // Measurement-only (gated behind detailedMetricsEnabled): real cost of building a tooltip
+    // on the miss path, and TextWidthCache effectiveness. Used to decide, with data, whether
+    // the deferred structural optimizations (layout cache, TextWidthCache rework) are worth it.
+    private long tooltipBuildNanos;
+    private long tooltipBuildSamples;
+    private long textWidthCacheHits;
+    private long textWidthCacheMisses;
+    private final long[] textWidthLengthBuckets = new long[5];
+
     private volatile String currentHoverState = "STABLE";
 
     public boolean detailedMetricsEnabled() { return detailedMetricsEnabled; }
@@ -103,6 +112,32 @@ public final class ReliefMetrics {
         }
     }
 
+    public void tooltipBuild(long nanos) {
+        if (detailedMetricsEnabled) {
+            tooltipBuildNanos += Math.max(0L, nanos);
+            tooltipBuildSamples++;
+        }
+    }
+
+    public void textWidthCacheHit(int length) {
+        if (detailedMetricsEnabled) {
+            textWidthCacheHits++;
+            recordTextWidthLength(length);
+        }
+    }
+
+    public void textWidthCacheMiss(int length) {
+        if (detailedMetricsEnabled) {
+            textWidthCacheMisses++;
+            recordTextWidthLength(length);
+        }
+    }
+
+    private void recordTextWidthLength(int length) {
+        int bucket = length <= 1 ? 0 : length == 2 ? 1 : length == 3 ? 2 : length <= 8 ? 3 : 4;
+        textWidthLengthBuckets[bucket]++;
+    }
+
     public void hoverState(String state) {
         if (!detailedMetricsEnabled) {
             return;
@@ -140,6 +175,31 @@ public final class ReliefMetrics {
     public long tooltipFallbackReuseAverageNanos() { return averageNanos(tooltipFallbackReuseNanos, tooltipReused); }
     public long tooltipFallbackMissAverageNanos() { return averageNanos(tooltipFallbackMissNanos, tooltipFallbackMisses); }
     public long tooltipForcedRenderAverageNanos() { return averageNanos(tooltipForcedRenderNanos, tooltipForcedRenders); }
+    public long tooltipBuildSamples() { return tooltipBuildSamples; }
+    public long tooltipBuildAverageNanos() { return averageNanos(tooltipBuildNanos, tooltipBuildSamples); }
+
+    /**
+     * Estimated wall-clock nanos that layout reuse saved this run: the measured average cost
+     * of one tooltip build multiplied by the number of builds avoided. Vanilla would build a
+     * tooltip on every tooltip-path invocation; the mod actually built one only
+     * {@code tooltipBuildSamples} times (the real {@code getTooltipFromItem} calls it timed —
+     * note this is higher than {@code tooltipExpensivePathInvocations}, which only counts
+     * fingerprint rebuilds, because the layout-cache TTL also forces real rebuilds). Only
+     * meaningful while detailed metrics are enabled, since the build cost is sampled then.
+     */
+    public long estimatedTooltipNanosSaved() {
+        long avoided = Math.max(0L, tooltipPathInvocations - tooltipBuildSamples);
+        return tooltipBuildAverageNanos() * avoided;
+    }
+
+    public long textWidthCacheHits() { return textWidthCacheHits; }
+    public long textWidthCacheMisses() { return textWidthCacheMisses; }
+
+    /** Length-bucketed counts of strings measured through the text-width cache: 1, 2, 3, 4-8, 9+. */
+    public long textWidthLengthBucket(int index) {
+        return index >= 0 && index < textWidthLengthBuckets.length ? textWidthLengthBuckets[index] : 0L;
+    }
+
     public String hoverState() { return currentHoverState; }
 
     private static long averageNanos(long totalNanos, long samples) {

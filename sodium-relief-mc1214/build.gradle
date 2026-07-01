@@ -1,0 +1,87 @@
+plugins {
+    id "com.modrinth.minotaur" version "2.+"
+    id "net.fabricmc.fabric-loom-remap" version "${loom_remap_version}"
+}
+
+base {
+    archivesName = "${mod_id}-mc1214"
+}
+
+loom {
+    mods {
+        sodiumrelief {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// Client gametest: drives a real client into an inventory screen and exports a
+// benchmark snapshot, mirroring the 1.21.11 module. Compiled here for parity; run via
+// `gradlew :sodium-relief-mc1214:runClientGameTest`.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "sodiumrelief-gametest"
+        // Only a client gametest exists. Older Fabric API (this range) makes the auto-wired
+        // server gametest task throw "No test functions were given!" instead of no-op'ing,
+        // so the server gametest is disabled; runClientGameTest still works.
+        enableGameTests = false
+        enableClientGameTests = true
+        eula = true
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_1214}"
+    mappings "net.fabricmc:yarn:${yarn_mappings_1214}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_12111}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_1214}"
+
+    // Shared, pure-Java logic packaged into the final jar.
+    implementation project(":sodium-relief-core")
+
+    modCompileOnly "com.terraformersmc:modmenu:${modmenu_1214}"
+    modLocalRuntime "com.terraformersmc:modmenu:${modmenu_1214}"
+
+    // No native Sodium options-page integration on this range (older Sodium config API);
+    // config is exposed via Mod Menu + the vanilla options button. So no Sodium dependency.
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+jar {
+    from(project(":sodium-relief-core").sourceSets.main.output)
+
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+sourcesJar {
+    from(project(":sodium-relief-core").sourceSets.main.allSource)
+}
+
+// Publish to Modrinth via Minotaur. Dry run by default (debugMode); pass -PmodrinthRelease
+// to actually upload. Token comes from the MODRINTH_TOKEN env var; project id is fixed below.
+modrinth {
+    debugMode = !project.hasProperty("modrinthRelease")
+    projectId = "sodium-relief"
+    versionNumber = "${project.version}+1.21.4"
+    versionName = "Sodium Relief ${project.version} for MC 1.21.4"
+    versionType = project.findProperty("modrinthVersionType") ?: "release"
+    uploadFile = tasks.remapJar
+    gameVersions = ["1.21.4"]
+    loaders = ["fabric"]
+    changelog = providers.environmentVariable("CHANGELOG").getOrElse("")
+    dependencies {
+        required.project "fabric-api"
+        optional.project "modmenu"
+        optional.project "sodium"
+    }
+}
